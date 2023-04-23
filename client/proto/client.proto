@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package cosmos.base.tendermint.v1beta1;
+
+option go_package = "./pb";
+import "google/protobuf/timestamp.proto";
+service Service {
+  // Get the latest block from the Tendermint node.
+  rpc GetLatestBlock(GetLatestBlockRequest) returns (GetLatestBlockResponse) {}
+}
+
+message GetLatestBlockRequest {}
+
+message GetLatestBlockResponse {
+  BlockID block_id = 1;
+
+  // Deprecated: please use `sdk_block` instead
+  Block block = 2;
+
+  // Since: cosmos-sdk 0.47
+//  Block sdk_block = 3;
+}
+
+// Block is tendermint type Block, with the Header proposer address
+// field converted to bech32 string.
+message Block {
+  Header    header      = 1;
+//  Data         data        = 2;
+//  EvidenceList evidence    = 3;
+//  Commit       last_commit = 4;
+}
+
+// BlockID
+message BlockID {
+  bytes         hash            = 1;
+  //  PartSetHeader part_set_header = 2;
+}
+// Header defines the structure of a Tendermint block header.
+message Header {
+  // basic block info
+  Consensus version  = 1;
+  string                        chain_id = 2;
+  int64                         height   = 3;
+  google.protobuf.Timestamp     time     = 4;
+
+  // prev block info
+  BlockID last_block_id = 5;
+
+//  // hashes of block data
+//  bytes last_commit_hash = 6; // commit from validators from the last block
+//  bytes data_hash        = 7; // transactions
+//
+//  // hashes from the app output from the prev block
+//  bytes validators_hash      = 8;  // validators for the current block
+//  bytes next_validators_hash = 9;  // validators for the next block
+//  bytes consensus_hash       = 10; // consensus params for current block
+//  bytes app_hash             = 11; // state after txs from the previous block
+//  bytes last_results_hash    = 12; // root hash of all results from the txs from the previous block
+//
+//  // consensus info
+//  bytes evidence_hash = 13; // evidence included in the block
+//
+//  // proposer_address is the original block proposer address, formatted as a Bech32 string.
+//  // In Tendermint, this type is `bytes`, but in the SDK, we convert it to a Bech32 string
+//  // for better UX.
+//  string proposer_address = 14; // original proposer of the block
+}
+
+// PartsetHeader
+message PartSetHeader {
+  uint32 total = 1;
+  bytes  hash  = 2;
+}
+
+
+
+// Data contains the set of transactions included in the block
+message Data {
+  // Txs that will be applied by state @ block.Height+1.
+  // NOTE: not all txs here are valid.  We're just agreeing on the order first.
+  // This means that block.AppHash does not include these txs.
+  repeated bytes txs = 1;
+}
+
+message EvidenceList {
+  repeated Evidence evidence = 1 ;
+}
+message Evidence {
+}
+message Consensus {
+
+  uint64 block = 1;
+  uint64 app   = 2;
+}
+
+message Commit {
+  int64              height     = 1;
+  int32              round      = 2;
+  BlockID            block_id   = 3;
+  repeated CommitSig signatures = 4;
+}
+
+// CommitSig is a part of the Vote included in a Commit.
+message CommitSig {
+  BlockIDFlag               block_id_flag     = 1;
+  bytes                     validator_address = 2;
+  google.protobuf.Timestamp timestamp         = 3;
+  bytes signature = 4;
+}
+enum BlockIDFlag {
+  BLOCK_ID_FLAG_UNKNOWN = 0;
+  BLOCK_ID_FLAG_ABSENT  = 1;
+  BLOCK_ID_FLAG_COMMIT  = 2;
+  BLOCK_ID_FLAG_NIL     = 3;
+}
