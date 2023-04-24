@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"flag"
 	"os"
 
 	"github.com/bhakiyakalimuthu/state-tracker/client"
+	"github.com/bhakiyakalimuthu/state-tracker/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -15,13 +15,13 @@ var (
 	_BuildVersion string
 	_AppName      string
 	//
-	serverAddrs = flag.String("SERVER_ADDRESS", "localhost:9090", "destination server address where traffic to be proxied")
 )
 
 func main() {
+	cfg := config.NewConfig()
 	l := newLogger(_AppName, _BuildVersion)
 	ctx, cancel := context.WithCancel(context.Background())
-	client.RunClient(ctx, cancel, l, *serverAddrs)
+	client.RunClient(ctx, cancel, l, cfg.ServerAddress)
 }
 
 func newLogger(appName, version string) *zap.Logger {

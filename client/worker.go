@@ -24,13 +24,13 @@ type Worker struct {
 }
 
 func NewWorker(logger *zap.Logger, pChan, cChan chan []Job, client pb.ServiceClient) (*Worker, error) {
-	file, err := os.OpenFile(fmt.Sprintf("./client/block_data_%d.json", time.Now().Unix()), os.O_APPEND|os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(fmt.Sprintf("./block_data_%d.json", time.Now().Unix()), os.O_APPEND|os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		logger.Error("failed to create and open file", zap.Error(err))
 		return nil, err
 	}
 	// Write the "test_result" key at the beginning of the file
-	_, err = file.Write([]byte(`{"test_result": [`))
+	_, err = file.Write([]byte(`{"test_result":`))
 	if err != nil {
 		logger.Error("failed to write data to file", zap.Error(err))
 		return nil, err
@@ -49,22 +49,17 @@ type Job struct {
 	Height int64  `json:"height"`
 }
 
-func (w *Worker) Process1(wg *sync.WaitGroup, workerID int) error {
+func (w *Worker) Process(wg *sync.WaitGroup, workerID int) error {
 	defer wg.Done()
 	for job := range w.cChan {
 		w.logger.Debug("received job", zap.Any("job", job))
-		dataBytes, err := json.Marshal(job)
-		if err != nil {
+		encoder := json.NewEncoder(w.file)
+		// Append the JSON data to the file
+		if err := encoder.Encode(job); err != nil {
 			w.logger.Error("failed to marshal jobs", zap.Error(err))
 			continue
 		}
-		_, err = w.file.Write(dataBytes)
-		if err != nil {
-			w.logger.Error("failed to create and open file", zap.Error(err))
-			continue
-		}
 	}
-	w.logger.Warn("moving to close")
 	err := w.file.Close()
 	if err != nil {
 		w.logger.Error("failed to close file", zap.Error(err))
@@ -73,6 +68,7 @@ func (w *Worker) Process1(wg *sync.WaitGroup, workerID int) error {
 	return nil
 }
 
+// Consume used for gradual job flow
 func (w *Worker) Consume(ctx context.Context) {
 	for {
 		select {

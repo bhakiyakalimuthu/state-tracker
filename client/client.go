@@ -32,8 +32,7 @@ func RunClient(ctx context.Context, cancel context.CancelFunc, logger *zap.Logge
 		logger.Fatal("failed to create worker", zap.Error(err))
 	}
 
-	// setup cancellation context and wait group
-	// root background with cancellation support
+	//  setup wait group with cancellation support
 	wg := new(sync.WaitGroup)
 
 	// start  the worker and consumer
