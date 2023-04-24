@@ -59,7 +59,8 @@ Run these commands in terminal shell
 * make build
 * ./state-tracker-server
 * ./state-tracker-client
-
+* `make clean` to cleanup locally build binary as well as block_data_{current-unix-timestamp}.json file
+ 
 ## III.Run as docker container
 ### step:1
     make docker-image-server
@@ -70,5 +71,8 @@ Run these commands in terminal shell
 
 * Note:Make sure to update the .env.example file before running as docker container
 
+
+
 > **Note**
-> Proxy server will work any destination server. Replace the default osmosis to any grpc endpoint
+> Proxy server can work with any destination server. Replace the default osmosis to any grpc endpoint
+> Block info json files are stored in the root folder as block_data_{current-unix-timestamp}.json file.

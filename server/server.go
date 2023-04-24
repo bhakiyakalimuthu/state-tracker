@@ -44,7 +44,7 @@ func RunServer(ctx context.Context, cancel context.CancelFunc, logger *zap.Logge
 		return err
 	}
 	// init grpc proxy server
-	s := grpc.NewServer(grpc.CustomCodec(proxy.Codec()), grpc.UnknownServiceHandler(proxy.TransparentHandler(director)))
+	s := grpc.NewServer(grpc.CustomCodec(proxy.Codec()), grpc.UnknownServiceHandler(proxy.TransparentHandler(director))) // nolint:staticcheck
 	pb.RegisterProxyServiceServer(s, &server{})
 
 	go func() {

@@ -15,6 +15,7 @@ import (
 
 const JobSize = 5
 
+// Worker represents a worker that processes jobs
 type Worker struct {
 	logger *zap.Logger
 	pChan  chan []Job // channel to receive jobs from producer
@@ -44,12 +45,14 @@ func NewWorker(logger *zap.Logger, pChan, cChan chan []Job, client pb.ServiceCli
 	}, nil
 }
 
+// Job represents a single job
 type Job struct {
 	Hash   string `json:"hash"`
 	Height int64  `json:"height"`
 }
 
-func (w *Worker) Process(wg *sync.WaitGroup, workerID int) error {
+// Process processes jobs from the cChan channel
+func (w *Worker) Process(wg *sync.WaitGroup, workerID int) {
 	defer wg.Done()
 	for job := range w.cChan {
 		w.logger.Debug("received job", zap.Any("job", job))
@@ -65,7 +68,6 @@ func (w *Worker) Process(wg *sync.WaitGroup, workerID int) error {
 		w.logger.Error("failed to close file", zap.Error(err))
 	}
 	w.logger.Warn("gracefully finishing worker process", zap.Int("WorkerID", workerID))
-	return nil
 }
 
 // Consume used for gradual job flow
@@ -96,11 +98,13 @@ func (w *Worker) Start(ctx context.Context) {
 			close(w.pChan)
 			return
 		case <-ticker.C:
+			//// Query the latest block from the proxy server
 			out, err := w.client.GetLatestBlock(ctx, &pb.GetLatestBlockRequest{})
 			if err != nil {
 				w.logger.Warn("failed to get latest block", zap.Error(err))
 				continue
 			}
+			// Get the current block height and check if it's the same as the last processed block
 			currentBlockHeight := out.GetBlock().GetHeader().GetHeight()
 			if currentBlockHeight <= lastBlockHeight {
 				w.logger.Info("same as current height, ", zap.Int64("currentBlockHeight", currentBlockHeight), zap.Int64("lastBlockHeight", lastBlockHeight)) // TODO:remove
@@ -114,6 +118,7 @@ func (w *Worker) Start(ctx context.Context) {
 			w.logger.Info("adding jobs", zap.Any("job", job)) // TODO:remove
 			jobs = append(jobs, job)
 			if len(jobs) == JobSize {
+				// Send the jobs to the processing channel and reset the job slice
 				w.logger.Info("job size reached, sending in to process", zap.Any("job", job)) // TODO:remove
 				w.pChan <- jobs                                                               // send in jobs to process
 				jobs = nil                                                                    // reset the job slice

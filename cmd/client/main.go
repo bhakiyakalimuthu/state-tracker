@@ -14,7 +14,6 @@ var (
 	// Included in the build process
 	_BuildVersion string
 	_AppName      string
-	//
 )
 
 func main() {

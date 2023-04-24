@@ -15,7 +15,8 @@ import (
 const workerPoolSize = 5
 
 func RunClient(ctx context.Context, cancel context.CancelFunc, logger *zap.Logger, serverAddrs string) {
-	conn, err := grpc.DialContext(ctx, serverAddrs, grpc.WithInsecure())
+	// make connection to the server address
+	conn, err := grpc.DialContext(ctx, serverAddrs, grpc.WithInsecure()) // nolint:staticcheck // SA1004 ignore this!
 	if err != nil {
 		logger.Fatal("failed to dial to proxy server", zap.Error(err))
 	}
