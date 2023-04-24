@@ -5,16 +5,20 @@ GOPATH := $(if $(GOPATH),$(GOPATH),~/go)
 VERSION := $(shell git describe --tags --always)
 
 clean:
-	rm -rf ${APP_NAME} build/
+	rm -rf ${APP_NAME}-* *.json build/
 
 build:
-	go build -trimpath -ldflags "-X main._BuildVersion=${VERSION}" -v -o ${APP_NAME} cmd/main.go
+	go build -trimpath -ldflags "-X main._BuildVersion=${VERSION}" -v -o ${APP_NAME}-server cmd/server/main.go
+	go build -trimpath -ldflags "-X main._BuildVersion=${VERSION}" -v -o ${APP_NAME}-client cmd/client/main.go
 
 test:
 	go test ./...
 
 test-race:
 	go test -race ./...
+
+mod:
+	go mod tidy
 
 lint:
 	gofmt -d -s .

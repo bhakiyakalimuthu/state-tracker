@@ -24,7 +24,7 @@ type Worker struct {
 }
 
 func NewWorker(logger *zap.Logger, pChan, cChan chan []Job, client pb.ServiceClient) (*Worker, error) {
-	file, err := os.OpenFile(fmt.Sprintf("./block_data_%d.json", time.Now().Unix()), os.O_APPEND|os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(fmt.Sprintf("./block_data_%d.json", time.Now().Unix()), os.O_APPEND|os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
 		logger.Error("failed to create and open file", zap.Error(err))
 		return nil, err
@@ -79,7 +79,6 @@ func (w *Worker) Consume(ctx context.Context) {
 			close(w.cChan)
 			return
 		}
-
 	}
 }
 
@@ -120,6 +119,5 @@ func (w *Worker) Start(ctx context.Context) {
 				jobs = nil                                                                    // reset the job slice
 			}
 		}
-
 	}
 }

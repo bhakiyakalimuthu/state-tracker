@@ -30,7 +30,6 @@ func TestGRPCServer(t *testing.T) {
 }
 
 func dialer(t *testing.T, serverAddress string) *pb.GetLatestBlockResponse {
-
 	// Create a new gRPC client that connects to the server
 	conn, err := grpc.Dial(serverAddress, grpc.WithInsecure())
 	if err != nil {

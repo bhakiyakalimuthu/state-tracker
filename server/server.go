@@ -20,7 +20,7 @@ type server struct {
 }
 
 // RunServer run server
-func RunServer(ctx context.Context, cancel context.CancelFunc, logger *zap.Logger, port string, proxyTo string) error {
+func RunServer(ctx context.Context, cancel context.CancelFunc, logger *zap.Logger, port, proxyTo string) error {
 	director := func(ctx context.Context, fullMethodName string) (proxy.Mode, []proxy.Backend, error) {
 		// Backend where all the inbound request will be forwarded
 		backend := &proxy.SingleBackend{
